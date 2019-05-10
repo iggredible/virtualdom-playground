@@ -7,7 +7,13 @@ const vApp = createElement("div", {
     id: "someId",
     class: "someClass"
   },
-  children: []
+  children: [
+    createElement("img", {
+      attrs: {
+        src: "https://media.giphy.com/media/26gsf19j60Wh8GlcQ/giphy.gif"
+      }
+    })
+  ]
 });
 
 const $app = render(vApp);

@@ -1,5 +1,5 @@
 // anonymous func
-const render = function(vNode) {
+const render = vNode => {
   const $el = document.createElement(vNode.tagName); // recall tagName is 'div'. $el will create div element
 
   for (const [k, v] of Object.entries(vNode.attrs)) {
@@ -8,7 +8,8 @@ const render = function(vNode) {
   }
 
   for (const child of vNode.children) {
-    render(child); // recursion
+    const $child = render(child); // recursion
+    $el.appendChild($child); // attaches/ appends the child into parent!
   }
 
   return $el;

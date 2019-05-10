@@ -130,9 +130,13 @@ exports.default = void 0;
 // attrs is the attribute thingy inside an element
 // like <div id="hello"> -> tagName div, id 'hello'
 // children could be text node, or more element inside
-var _default = function _default(tagName, _ref) {
-  var attrs = _ref.attrs,
-      children = _ref.children;
+var _default = function _default(tagName) {
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      _ref$attrs = _ref.attrs,
+      attrs = _ref$attrs === void 0 ? {} : _ref$attrs,
+      _ref$children = _ref.children,
+      children = _ref$children === void 0 ? [] : _ref$children;
+
   return {
     tagName: tagName,
     attrs: attrs,
@@ -177,7 +181,9 @@ var render = function render(vNode) {
   try {
     for (var _iterator = vNode.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
       var child = _step.value;
-      render(child); // recursion
+      var $child = render(child); // recursion
+
+      $el.appendChild($child); // attaches/ appends the child into parent!
     }
   } catch (err) {
     _didIteratorError = true;
@@ -214,7 +220,11 @@ var vApp = (0, _createElement.default)("div", {
     id: "someId",
     class: "someClass"
   },
-  children: []
+  children: [(0, _createElement.default)("img", {
+    attrs: {
+      src: "https://media.giphy.com/media/26gsf19j60Wh8GlcQ/giphy.gif"
+    }
+  })]
 });
 var $app = (0, _render.default)(vApp); // next we need to render it
 
