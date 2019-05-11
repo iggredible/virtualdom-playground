@@ -1,18 +1,16 @@
-// anonymous func
 const render = vNode => {
-  const $el = document.createElement(vNode.tagName); // recall tagName is 'div'. $el will create div element
+  const newElement = document.createElement(vNode.tagName);
 
   for (const [k, v] of Object.entries(vNode.attrs)) {
-    // object.entries return an array of array pair of key-values - hence k, v array
-    $el.setAttribute(k, v); //sets attribute; here we have attrs: {id: 'someId', class: 'someClass'} - so it is rightfully we can set attribute for the newly created div element!
+    newElement.setAttribute(k, v);
   }
-
+  // setting up children
   for (const child of vNode.children) {
-    const $child = render(child); // recursion
-    $el.appendChild($child); // attaches/ appends the child into parent!
+    const childElement = render(child);
+    newElement.appendChild(childElement);
   }
 
-  return $el;
+  return newElement;
 };
 
 export default render;

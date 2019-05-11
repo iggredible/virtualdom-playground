@@ -1,11 +1,11 @@
-import createElement from "./vdom/createElement";
 import render from "./vdom/render";
+import createElement from "./vdom/createElement";
+import mount from "./vdom/mount";
 
-// this is our vdom!
-const vApp = createElement("div", {
+const vNode = createElement("div", {
   attrs: {
-    id: "someId",
-    class: "someClass"
+    className: "someClass",
+    id: "someId"
   },
   children: [
     createElement("img", {
@@ -16,7 +16,9 @@ const vApp = createElement("div", {
   ]
 });
 
-const $app = render(vApp);
-// next we need to render it
-console.log("vApp: ", vApp);
+const $app = render(vNode); // entire app structure is here - ready as newelement
+
+const $target = document.getElementById("app");
+mount($app, $target);
+
 console.log("$app: ", $app);

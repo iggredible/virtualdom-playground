@@ -117,35 +117,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"vdom/createElement.js":[function(require,module,exports) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = void 0;
-
-// like React.createElement
-// tagname is like DOM elements, 'div', or 'h1', or 'span'
-// attrs is the attribute thingy inside an element
-// like <div id="hello"> -> tagName div, id 'hello'
-// children could be text node, or more element inside
-var _default = function _default(tagName) {
-  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-      _ref$attrs = _ref.attrs,
-      attrs = _ref$attrs === void 0 ? {} : _ref$attrs,
-      _ref$children = _ref.children,
-      children = _ref$children === void 0 ? [] : _ref$children;
-
-  return {
-    tagName: tagName,
-    attrs: attrs,
-    children: children
-  };
-};
-
-exports.default = _default;
-},{}],"vdom/render.js":[function(require,module,exports) {
+})({"vdom/render.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -161,18 +133,17 @@ function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = 
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-// anonymous func
 var render = function render(vNode) {
-  var $el = document.createElement(vNode.tagName); // recall tagName is 'div'. $el will create div element
+  var newElement = document.createElement(vNode.tagName);
 
   for (var _i = 0, _Object$entries = Object.entries(vNode.attrs); _i < _Object$entries.length; _i++) {
     var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2),
         k = _Object$entries$_i[0],
         v = _Object$entries$_i[1];
 
-    // object.entries return an array of array pair of key-values - hence k, v array
-    $el.setAttribute(k, v); //sets attribute; here we have attrs: {id: 'someId', class: 'someClass'} - so it is rightfully we can set attribute for the newly created div element!
-  }
+    newElement.setAttribute(k, v);
+  } // setting up children
+
 
   var _iteratorNormalCompletion = true;
   var _didIteratorError = false;
@@ -181,9 +152,8 @@ var render = function render(vNode) {
   try {
     for (var _iterator = vNode.children[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
       var child = _step.value;
-      var $child = render(child); // recursion
-
-      $el.appendChild($child); // attaches/ appends the child into parent!
+      var childElement = render(child);
+      newElement.appendChild(childElement);
     }
   } catch (err) {
     _didIteratorError = true;
@@ -200,25 +170,63 @@ var render = function render(vNode) {
     }
   }
 
-  return $el;
+  return newElement;
 };
 
 var _default = render;
 exports.default = _default;
+},{}],"vdom/createElement.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _default = function _default(tagName) {
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      _ref$attrs = _ref.attrs,
+      attrs = _ref$attrs === void 0 ? {} : _ref$attrs,
+      _ref$children = _ref.children,
+      children = _ref$children === void 0 ? [] : _ref$children;
+
+  return {
+    tagName: tagName,
+    attrs: attrs,
+    children: children
+  };
+};
+
+exports.default = _default;
+},{}],"vdom/mount.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _default = function _default(node, target) {
+  target.replaceWith(node);
+  return;
+};
+
+exports.default = _default;
 },{}],"main.js":[function(require,module,exports) {
 "use strict";
 
+var _render = _interopRequireDefault(require("./vdom/render"));
+
 var _createElement = _interopRequireDefault(require("./vdom/createElement"));
 
-var _render = _interopRequireDefault(require("./vdom/render"));
+var _mount = _interopRequireDefault(require("./vdom/mount"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// this is our vdom!
-var vApp = (0, _createElement.default)("div", {
+var vNode = (0, _createElement.default)("div", {
   attrs: {
-    id: "someId",
-    class: "someClass"
+    className: "someClass",
+    id: "someId"
   },
   children: [(0, _createElement.default)("img", {
     attrs: {
@@ -226,11 +234,12 @@ var vApp = (0, _createElement.default)("div", {
     }
   })]
 });
-var $app = (0, _render.default)(vApp); // next we need to render it
+var $app = (0, _render.default)(vNode); // entire app structure is here - ready as newelement
 
-console.log("vApp: ", vApp);
+var $target = document.getElementById("app");
+(0, _mount.default)($app, $target);
 console.log("$app: ", $app);
-},{"./vdom/createElement":"vdom/createElement.js","./vdom/render":"vdom/render.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./vdom/render":"vdom/render.js","./vdom/createElement":"vdom/createElement.js","./vdom/mount":"vdom/mount.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -258,7 +267,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50727" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58316" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
