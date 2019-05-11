@@ -2,23 +2,32 @@ import render from "./vdom/render";
 import createElement from "./vdom/createElement";
 import mount from "./vdom/mount";
 
-const vNode = createElement("div", {
-  attrs: {
-    className: "someClass",
-    id: "someId"
-  },
-  children: [
-    createElement("img", {
-      attrs: {
-        src: "https://media.giphy.com/media/26gsf19j60Wh8GlcQ/giphy.gif"
-      }
-    })
-  ]
-});
+const createVApp = count =>
+  createElement("div", {
+    attrs: {
+      className: "someClass",
+      id: "someId",
+      dataCount: String(count)
+    },
+    children: [
+      String(count),
+      createElement("img", {
+        attrs: {
+          src: "https://media.giphy.com/media/26gsf19j60Wh8GlcQ/giphy.gif"
+        }
+      })
+    ]
+  });
 
-const $app = render(vNode); // entire app structure is here - ready as newelement
+let count = 0;
+const vApp = createVApp(count);
+const $app = render(vApp);
 
-const $target = document.getElementById("app");
-mount($app, $target);
+let $rootEl = mount($app, document.getElementById("app"));
 
-console.log("$app: ", $app);
+console.log("app: ", $app);
+
+setInterval(() => {
+  count++;
+  $rootEl = mount(render(render(createVApp(count)), $rootEl));
+}, 1000);

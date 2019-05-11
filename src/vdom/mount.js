@@ -1,4 +1,4 @@
 export default (node, target) => {
   target.replaceWith(node);
-  return;
+  return node;
 };
