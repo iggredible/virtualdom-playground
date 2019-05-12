@@ -7,7 +7,7 @@ const createVApp = count =>
     attrs: {
       className: "someClass",
       id: "someId",
-      dataCount: String(count)
+      dataCount: count
     },
     children: [
       String(count),
@@ -25,9 +25,7 @@ const $app = render(vApp);
 
 let $rootEl = mount($app, document.getElementById("app"));
 
-console.log("app: ", $app);
-
 setInterval(() => {
   count++;
-  $rootEl = mount(render(render(createVApp(count)), $rootEl));
+  $rootEl = mount(render(createVApp(count)), $rootEl);
 }, 1000);

@@ -1,17 +1,17 @@
 const renderElem = ({ tagName, attrs, children }) => {
-  const newElement = document.createElement(tagName);
-  // console.log("tagName:", tagName);
-  // console.log("attrs:", attrs);
-  // console.log("children:", children);
+  const $el = document.createElement(tagName);
+
+  // set attributes
   for (const [k, v] of Object.entries(attrs)) {
-    newElement.setAttribute(k, v);
-  }
-  for (const child of children) {
-    const childElement = render(child);
-    newElement.appendChild(childElement);
+    $el.setAttribute(k, v);
   }
 
-  return newElement;
+  // set children
+  for (const child of children) {
+    const $child = render(child);
+    $el.appendChild($child);
+  }
+  return $el;
 };
 
 const render = vNode => {
