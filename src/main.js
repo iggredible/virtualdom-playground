@@ -1,6 +1,7 @@
 import render from "./vdom/render";
 import createElement from "./vdom/createElement";
 import mount from "./vdom/mount";
+import diff from "./vdom/diff";
 
 /* returns object necessary to createElement */
 const createVApp = count =>
@@ -22,7 +23,7 @@ const createVApp = count =>
   });
 
 let count = 0;
-const vApp = createVApp(count); // vApp is createVApp with count var
+let vApp = createVApp(count); // vApp is createVApp with count var
 
 const $app = render(vApp); // $app is the actual HTML element, ready to replaceWith $rootEl
 
@@ -31,5 +32,13 @@ let $rootEl = mount($app, document.getElementById("app")); // rootElement is whe
 
 setInterval(() => {
   count++; // each second, increment by 1000
-  $rootEl = mount(render(createVApp(count)), $rootEl); // mounts to id="app" element, the entire HTML element from render(createVApp(count)) - this one will have incrementally different count
+  const vNewApp = createVApp(count); // updated VApp with count +1 (1 more than last one - updated)
+  const patch = diff(vApp, vNewApp); // this is returning the difference between vApp and vNewApp ifferences should be dataCount and String(count)
+  // patch is the difference. Think of it as returning the HTML element of ONLY the difference
+  // patch is a function (recall it return $node => {...}
+  $rootEl = patch($rootEl); // once the difference is determined, it will be mounted into $rootEl
+  // rootEl might/ might not be the same. But remember, rootEl contains $app, which may contain different count
+  // mount TO $rootEl the DIFFERENCE (in $node
+  vApp = vNewApp; // don't forget, vApp is now the new newapp, as there will be NEWER update on app
+  // $rootEl = mount(render(createVApp(count)), $rootEl); // mounts to id="app" element, the entire HTML element from render(createVApp(count)) - this one will have incrementally different count
 }, 1000);
