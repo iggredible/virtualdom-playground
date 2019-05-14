@@ -1,17 +1,27 @@
 import render from "./render";
 
+const zip = (xs, ys) => {
+  const zipped = [];
+  for (let i = 0; i < Math.max(xs.length, ys.length); i++) {
+    zipped.push([xs[i], ys[i]]);
+  }
+  return zipped;
+};
+
 const diffAttrs = (oldAttrs, newAttrs) => {
   const patches = [];
+
+  // set new attributes
   for (const [k, v] of Object.entries(newAttrs)) {
     patches.push($node => {
       $node.setAttribute(k, v);
-      return $node; // why return $node here? Wait, each push is: an action of setting attribute. It will then return a function that accepts an argument, $node. That $node is returned and stored as array
+      return $node;
     });
   }
+
+  // remove old attributes
   for (const k in oldAttrs) {
-    // iterate through all keys in oldAttrs
     if (!(k in newAttrs)) {
-      // also, make sure k is NOT in newattrs - otherwise it may be reordered attr
       patches.push($node => {
         $node.removeAttribute(k);
         return $node;
@@ -25,13 +35,36 @@ const diffAttrs = (oldAttrs, newAttrs) => {
     }
   };
 };
-const diffChildren = () => {};
+
+const diffChildren = (oldVChildren, newVChildren) => {
+  const childPatches = [];
+  oldVChildren.forEach((oldVChild, i) => {
+    childPatches.push(diff(oldVChild, newVChildren[i]));
+  });
+
+  const additionalPatches = [];
+  for (const additionalVChild of newVChildren.slice(oldVChildren.length)) {
+    additionalPatches.push($node => {
+      $node.appendChild(render(additionalVChild));
+      return $node;
+    });
+  }
+
+  return $parent => {
+    for (const [patch, child] of zip(childPatches, $parent.childNodes)) {
+      patch(child);
+    }
+
+    for (const patch of additionalPatches) {
+      patch($parent);
+    }
+
+    return $parent;
+  };
+};
 
 const diff = (vOldNode, vNewNode) => {
   if (vNewNode === undefined) {
-    // if newnode is undefined (and oldnode exists, then the node must have gotte ndeleted somehow
-    // remove $node?
-    // $node I think will be $rootEl where it will be attached to
     return $node => {
       $node.remove();
       return undefined;
@@ -41,31 +74,29 @@ const diff = (vOldNode, vNewNode) => {
   if (typeof vOldNode === "string" || typeof vNewNode === "string") {
     if (vOldNode !== vNewNode) {
       return $node => {
-        const $newNode = render(vNewNode); //render the new string node
-        $node.replaceWith($newNode); // replace the MOUNTING element
-        return $newNode; // returns the HTML-ready node
+        const $newNode = render(vNewNode);
+        $node.replaceWith($newNode);
+        return $newNode;
       };
     } else {
-      return $node => undefined; // if they are the same string, do nothing
+      return $node => undefined;
     }
   }
 
   if (vOldNode.tagName !== vNewNode.tagName) {
-    // if tagname is diff - make assumption that the children is different
     return $node => {
       const $newNode = render(vNewNode);
-      $node.replaceWith($newNode); // dont care about vOldNode anymore
-      // replaceWith new node on MOUNTING div
+      $node.replaceWith($newNode);
       return $newNode;
     };
   }
 
   const patchAttrs = diffAttrs(vOldNode.attrs, vNewNode.attrs);
-  // const patchChildren = diffChildren(vOldNode.children, vNewNode.children);
+  const patchChildren = diffChildren(vOldNode.children, vNewNode.children);
 
   return $node => {
     patchAttrs($node);
-    // patchChildren($node);
+    patchChildren($node);
     return $node;
   };
 };
